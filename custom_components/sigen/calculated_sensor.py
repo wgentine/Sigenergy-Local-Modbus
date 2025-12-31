@@ -1151,10 +1151,21 @@ class SigenergyIntegrationSensor(SigenergyEntity, RestoreSensor):
         return elapsed_time * (left + right) / Decimal(2)
 
     def _update_integral(self, area: Decimal) -> None:
-        """Update the integral with the calculated area."""
+        """Update the integral with the calculated area.
+        
+        The area parameter is in power·seconds (e.g., W·s or kW·s).
+        We need to convert to kWh:
+        - If power is in W: (W·s) / (1000 * 3600) = kWh
+        - If power is in kW: (kW·s) / 3600 = kWh
+        
+        Home Assistant stores power sensor states in the base unit (W),
+        so we divide by 3600000 to convert W·s to kWh.
+        """
         state_before = self._state
-        # Convert seconds to hours
-        area_scaled = area / Decimal(3600)
+        # Convert seconds to hours and watts to kilowatts
+        # Area is in W·s (watts * seconds) because source power state is in W
+        # We need to convert to kWh: (W·s) / (1000 * 3600) = kWh
+        area_scaled = area / Decimal(3600000)
 
         if isinstance(self._state, Decimal):
             self._state += area_scaled
