@@ -1154,7 +1154,7 @@ class SigenergyIntegrationSensor(SigenergyEntity, RestoreSensor):
         """Update the integral with the calculated area."""
         state_before = self._state
         # Convert seconds to hours
-        area_scaled = area / Decimal(3600)
+        area_scaled = area / Decimal(3600000)
 
         if isinstance(self._state, Decimal):
             self._state += area_scaled
